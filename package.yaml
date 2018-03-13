@@ -1,0 +1,67 @@
+name:                frottola
+version:             0.1.0.0
+github:              "brandonhamilton/frottola"
+license:             BSD3
+author:              "Brandon Hamilton"
+maintainer:          "brandon.hamilton@gmail.com"
+copyright:           "Copyright: (c) 2018 Brandon Hamilton"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+description:         Please see the README on Github at <https://github.com/brandonhamilton/frottola#readme>
+
+default-extensions: 
+- DeriveFoldable
+- DeriveFunctor
+- DeriveGeneric
+- DeriveLift
+- DeriveTraversable
+- EmptyCase
+- FlexibleContexts
+- FlexibleInstances
+- GeneralizedNewtypeDeriving
+- InstanceSigs
+- LambdaCase
+- MultiParamTypeClasses
+- NamedFieldPuns
+- OverloadedStrings
+- ScopedTypeVariables
+- StandaloneDeriving
+
+dependencies:
+- base >= 4.7 && < 5
+- parsix
+- text
+
+library:
+  source-dirs: src
+  dependencies:
+  - parsers
+  - unordered-containers
+
+executables:
+  frottola-repl:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskeline
+    - prettyprinter
+    - prettyprinter-ansi-terminal
+    - frottola
+
+tests:
+  frottola-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - frottola
