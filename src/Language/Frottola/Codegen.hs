@@ -18,6 +18,7 @@ import qualified LLVM.AST.Constant as C
 import qualified LLVM.AST.Attribute as A
 import qualified LLVM.AST.CallingConvention as CC
 import qualified LLVM.AST.FloatingPointPredicate as FP
+import qualified LLVM.AST.Instruction as LI
 
 textToShort :: Text -> ShortByteString
 textToShort = toShort . T.encodeUtf8
@@ -210,6 +211,13 @@ instr ins = do
   modifyBlock (blk { stack = (ref := ins) : i })
   pure (local ref)
 
+voidinstr :: Instruction -> Codegen ()
+voidinstr ins = do
+  blk <- current
+  let i = stack blk
+  modifyBlock (blk { stack = (LI.Do ins) : i })
+  pure ()
+
 terminator :: Named Terminator -> Codegen (Named Terminator)
 terminator trm = do
   blk <- current
@@ -273,8 +281,8 @@ call fn args = instr $ Call Nothing CC.C [] (Right fn) (toArgs args) [] []
 alloca :: Type -> Codegen Operand
 alloca typ = instr $ Alloca typ Nothing 0 []
 
-store :: Operand -> Operand -> Codegen Operand
-store ptr val = instr $ Store False ptr val Nothing 0 []
+store :: Operand -> Operand -> Codegen ()
+store ptr val = voidinstr $ Store False ptr val Nothing 0 []
 
 load :: Operand -> Codegen Operand
 load ptr = instr $ Load False ptr Nothing 0 []

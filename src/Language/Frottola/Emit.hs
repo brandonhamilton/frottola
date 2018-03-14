@@ -21,7 +21,7 @@ codegen :: AST.Module -> [S.Expr] -> IO AST.Module
 codegen mod funs = withContext $ \context ->
   withModuleFromAST context ast $ \m -> do
     llstr <- moduleLLVMAssembly m
-    --print llstr
+    print llstr
     pure ast
   where
     ast = runLLVM mod (mapM codegenProgram funs)
@@ -37,12 +37,12 @@ codegenProgram (S.Function name args body) = define double name funargs bls
   where
     funargs = toSig args
     bls = createBlocks $ execCodegen $ do
-      entry <- addBlock startBlockName
-      setBlock entry
+      start <- addBlock startBlockName
+      setBlock start
       forM args $ \a -> do        
-        var <- alloca double
-        store var (local (AST.Name (textToShort a)))
-        assign a var
+        v <- alloca double
+        store v (local (AST.Name (textToShort a)))
+        assign a v
       cgen body >>= ret
 
 codegenProgram (S.Extern name args) = external double name (toSig args)
@@ -50,8 +50,8 @@ codegenProgram (S.Extern name args) = external double name (toSig args)
 codegenProgram exp = define double "main" [] blks
   where
     blks = createBlocks $ execCodegen $ do
-      entry <- addBlock startBlockName
-      setBlock entry
+      start <- addBlock startBlockName
+      setBlock start
       cgen exp >>= ret
 
 -- |
