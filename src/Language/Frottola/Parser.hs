@@ -20,12 +20,14 @@ style = IdentifierStyle
   }
 
 opsTable :: (Monad m, TokenParsing m) => [[Operator m Expr]]
-opsTable = 
-  [ [binary "*" Multiply AssocLeft, binary "/" Divide AssocLeft ]
-  , [binary "+" Add AssocLeft, binary "-" Subtract AssocLeft ]
+opsTable =
+  [ [binary "*" AssocLeft, binary "/" AssocLeft, binary "%" AssocLeft ]
+  , [binary "+" AssocLeft, binary "-" AssocLeft ]
+  , [binary "<" AssocLeft, binary ">" AssocLeft ]
+  , [binary "=" AssocRight]
   ]
   where
-    binary sym op = Infix (BinOp op <$ reserve emptyOps sym <?> "binary operation")
+    binary sym = Infix (BinOp sym <$ reserveText emptyOps sym <?> "binary operation")
 
 identifier :: (Monad m, TokenParsing m) => m Text
 identifier = ident style
@@ -43,16 +45,16 @@ variable :: (Monad m, TokenParsing m) => m Expr
 variable = Var <$> identifier <?> "variable"
 
 function :: (Monad m, TokenParsing m) => m Expr
-function = reserved "def" >> Function <$> identifier <*> parens (many variable) <*> expr <?> "function"
+function = reserved "def" >> Function <$> identifier <*> parens (many identifier) <*> expr <?> "function"
 
 extern :: (Monad m, TokenParsing m) => m Expr
-extern = reserved "extern" >> Extern <$> identifier <*> parens (many variable) <?> "extern"
+extern = reserved "extern" >> Extern <$> identifier <*> parens (many identifier) <?> "extern"
 
 call :: (Monad m, TokenParsing m) => m Expr
 call = Call <$> identifier <*> parens (commaSep expr) <?> "call"
 
 factor :: (Monad m, TokenParsing m) => m Expr
-factor = choice [ try floating, try extern, try function, try call, variable, parens expr ] <?> "factor"
+factor = choice [ try floating, try call, try variable, parens expr ] <?> "factor"
 
 defn :: (Monad m, TokenParsing m) => m Expr
 defn = choice [ try extern, try function, expr ] <?> "definition"

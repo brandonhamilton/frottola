@@ -32,19 +32,23 @@ default-extensions:
 
 dependencies:
 - base >= 4.7 && < 5
+- llvm-hs-pure
 - parsix
 - text
 
 library:
   source-dirs: src
   dependencies:
+  - bytestring
   - containers
-  - llvm-hs-pure
   - llvm-hs
+  - mtl
   - parsers
+  - transformers
+  - unordered-containers
 
 executables:
-  frottola-repl:
+  frottola:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

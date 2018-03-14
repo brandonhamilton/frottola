@@ -12,15 +12,15 @@ data Expr
   -- | Value
   = Float Double
   -- | Binary operation
-  | BinOp Op Expr Expr
+  | BinOp Name Expr Expr
   -- | Variable binding
   | Var Text
   -- | Function call
   | Call Name [Expr]
   -- | Function definition
-  | Function Name [Expr] Expr
+  | Function Name [Name] Expr
   -- | External call
-  | Extern Name [Expr]
+  | Extern Name [Name]
   deriving (Eq, Ord, Show)
 
 -- |
