@@ -38,8 +38,10 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
+  - containers
+  - llvm-hs-pure
+  - llvm-hs
   - parsers
-  - unordered-containers
 
 executables:
   frottola-repl:

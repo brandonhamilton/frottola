@@ -6,3 +6,7 @@ packages:
     git: https://github.com/ollef/parsix.git
     commit: b0e0597ee0947181e40939ab7a77a3b6ba496b21
   extra-dep: true
+
+extra-deps:
+- llvm-hs-6.0.0
+- llvm-hs-pure-6.0.0
