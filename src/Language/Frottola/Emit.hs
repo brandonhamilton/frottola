@@ -14,8 +14,6 @@ import qualified LLVM.AST.Constant as C
 import qualified LLVM.AST.Float as F
 import qualified LLVM.AST.FloatingPointPredicate as FP
 
-import Debug.Trace (trace)
-
 liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
@@ -23,7 +21,7 @@ codegen :: AST.Module -> [S.Expr] -> IO AST.Module
 codegen mod funs = withContext $ \context ->
   withModuleFromAST context ast $ \m -> do
     llstr <- moduleLLVMAssembly m
-    print llstr
+    --print llstr
     pure ast
   where
     ast = runLLVM mod (mapM codegenProgram funs)
@@ -42,10 +40,10 @@ codegenProgram (S.Function name args body) = define double name funargs bls
       entry <- addBlock startBlockName
       setBlock entry
       forM args $ \a -> do        
-        var <- trace ("Allocating arg " ++ show a) alloca double
+        var <- alloca double
         store var (local (AST.Name (textToShort a)))
-        trace ("Assigning arg " ++ show a) $ assign a var
-      trace ("Generating body") cgenreal body >>= trace ("Generating ret") ret
+        assign a var
+      cgen body >>= ret
 
 codegenProgram (S.Extern name args) = external double name (toSig args)
 
@@ -54,18 +52,13 @@ codegenProgram exp = define double "main" [] blks
     blks = createBlocks $ execCodegen $ do
       entry <- addBlock startBlockName
       setBlock entry
-      cgenreal exp >>= ret
+      cgen exp >>= ret
 
 -- |
 -- Expression level
 
 binop :: (AST.Operand -> AST.Operand -> Codegen AST.Operand) -> S.Expr -> S.Expr -> Codegen AST.Operand
-binop o a b = join (o <$> cgenreal a <*> cgenreal b)
-
-cgenreal :: S.Expr -> Codegen AST.Operand
-cgenreal e = do
-  s <- get
-  trace (show s) cgen e
+binop o a b = join (o <$> cgen a <*> cgen b)
 
 cgen :: S.Expr -> Codegen AST.Operand
 cgen (S.Float n) = pure $ cons $ C.Float (F.Double n)

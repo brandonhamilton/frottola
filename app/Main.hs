@@ -6,6 +6,7 @@ import Data.Maybe
 import Data.Text.Prettyprint.Doc
 import Data.Text.Prettyprint.Doc.Render.Terminal
 import Data.Text
+import Data.Text.Lazy (toStrict)
 import Language.Frottola.Parser
 import Language.Frottola.Codegen
 import Language.Frottola.Emit
@@ -13,6 +14,7 @@ import System.Console.Haskeline
 import System.Environment
 import Text.Parsix
 
+import LLVM.Pretty (ppllvm)
 import qualified LLVM.AST as AST
 
 initModule :: AST.Module
@@ -24,7 +26,7 @@ process out mod line = case parseProgram line of
     Success p -> do
       out . pack . show $ p
       ast <- liftIO (codegen mod p)
-      --out . pack . show $ ast
+      out . toStrict . ppllvm $ ast
       pure $ Just ast
   where
     output t = out $ renderStrict (layoutPretty defaultLayoutOptions t)

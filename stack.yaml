@@ -10,3 +10,4 @@ packages:
 extra-deps:
 - llvm-hs-6.0.0
 - llvm-hs-pure-6.0.0
+- llvm-hs-pretty-0.2.0.0

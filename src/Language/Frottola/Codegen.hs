@@ -18,7 +18,6 @@ import qualified LLVM.AST.Constant as C
 import qualified LLVM.AST.Attribute as A
 import qualified LLVM.AST.CallingConvention as CC
 import qualified LLVM.AST.FloatingPointPredicate as FP
-import Debug.Trace
 
 textToShort :: Text -> ShortByteString
 textToShort = toShort . T.encodeUtf8
@@ -82,7 +81,7 @@ addDefinition d = do
 
 -- Local functions
 define :: Type -> Text -> [(Type, Name)] -> [BasicBlock] -> LLVM ()
-define typ label argtyps body = trace ("DEFINE " ++ show typ) addDefinition $ GlobalDefinition $
+define typ label argtyps body = addDefinition $ GlobalDefinition $
   functionDefaults
     { name = Name (textToShort label)
     , parameters = ([Parameter ty nm [] | (ty, nm) <- argtyps], False)
@@ -92,7 +91,7 @@ define typ label argtyps body = trace ("DEFINE " ++ show typ) addDefinition $ Gl
 
 -- External functions
 external :: Type -> Text -> [(Type, Name)] -> LLVM ()
-external typ label argtyps = trace ("EXTERNAL " ++ show typ) addDefinition $ GlobalDefinition $
+external typ label argtyps = addDefinition $ GlobalDefinition $
   functionDefaults
     { name = Name (textToShort label)
     , linkage = L.External
