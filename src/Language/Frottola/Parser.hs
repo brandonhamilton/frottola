@@ -11,23 +11,24 @@ import qualified Text.Parser.Token.Highlight as Highlight
 
 style :: CharParsing m => IdentifierStyle m
 style = IdentifierStyle
-  { _styleName = "identifier"
-  , _styleStart = letter <|> oneOf "_"
-  , _styleLetter = alphaNum <|> oneOf "-'"
-  , _styleReserved = HS.fromList ["def", "extern"]
-  , _styleHighlight = Highlight.Identifier
+  { _styleName              = "identifier"
+  , _styleStart             = letter <|> oneOf "_"
+  , _styleLetter            = alphaNum <|> oneOf "-'"
+  , _styleReserved          = HS.fromList ["def", "extern"]
+  , _styleHighlight         = Highlight.Identifier
   , _styleReservedHighlight = Highlight.ReservedIdentifier
   }
 
 opsTable :: (Monad m, TokenParsing m) => [[Operator m Expr]]
 opsTable =
-  [ [binary "*" AssocLeft, binary "/" AssocLeft, binary "%" AssocLeft ]
-  , [binary "+" AssocLeft, binary "-" AssocLeft ]
-  , [binary "<" AssocLeft, binary ">" AssocLeft ]
+  [ [binary "*" AssocLeft, binary "/" AssocLeft, binary "%" AssocLeft]
+  , [binary "+" AssocLeft, binary "-" AssocLeft]
+  , [binary "<" AssocLeft, binary ">" AssocLeft]
   , [binary "=" AssocRight]
   ]
-  where
-    binary sym = Infix (BinOp sym <$ reserveText emptyOps sym <?> "binary operation")
+ where
+  binary sym =
+    Infix (BinOp sym <$ reserveText emptyOps sym <?> "binary operation")
 
 identifier :: (Monad m, TokenParsing m) => m Text
 identifier = ident style
@@ -45,19 +46,31 @@ variable :: (Monad m, TokenParsing m) => m Expr
 variable = Var <$> identifier <?> "variable"
 
 function :: (Monad m, TokenParsing m) => m Expr
-function = reserved "def" >> Function <$> identifier <*> parens (many identifier) <*> expr <?> "function"
+function =
+  reserved "def"
+    >>  Function
+    <$> identifier
+    <*> parens (many identifier)
+    <*> expr
+    <?> "function"
 
 extern :: (Monad m, TokenParsing m) => m Expr
-extern = reserved "extern" >> Extern <$> identifier <*> parens (many identifier) <?> "extern"
+extern =
+  reserved "extern"
+    >>  Extern
+    <$> identifier
+    <*> parens (many identifier)
+    <?> "extern"
 
 call :: (Monad m, TokenParsing m) => m Expr
 call = Call <$> identifier <*> parens (commaSep expr) <?> "call"
 
 factor :: (Monad m, TokenParsing m) => m Expr
-factor = choice [ try floating, try call, try variable, parens expr ] <?> "factor"
+factor =
+  choice [try floating, try call, try variable, parens expr] <?> "factor"
 
 defn :: (Monad m, TokenParsing m) => m Expr
-defn = choice [ try extern, try function, expr ] <?> "definition"
+defn = choice [try extern, try function, expr] <?> "definition"
 
 program :: (Monad m, TokenParsing m) => m Program
 program = many (defn <* reserve emptyOps ";")
