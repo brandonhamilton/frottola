@@ -9,6 +9,7 @@ import Data.Text
 import Data.Text.Lazy (toStrict)
 import Language.Frottola.Parser
 import Language.Frottola.Codegen
+import Language.Frottola.Optimizer
 import LLVM.Pretty (ppllvm)
 import qualified LLVM.AST as AST
 import System.Console.Haskeline
@@ -20,8 +21,8 @@ process
 process out mod line = case parseProgram line of
   Failure e -> output (prettyError e) >> return Nothing
   Success p -> do
-    out . pack . show $ p
-    ast <- liftIO (codegen mod p)
+    -- out . pack . show $ p
+    ast <- liftIO (codegen mod p >>= runOpt)
     out . toStrict . ppllvm $ ast
     pure $ Just ast
   where output t = out $ renderStrict (layoutPretty defaultLayoutOptions t)

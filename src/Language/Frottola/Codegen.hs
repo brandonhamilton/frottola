@@ -72,9 +72,8 @@ callExtern fn args = AST.Call Nothing CC.C [] (Right fn) (toArgs args) [] []
 codegen :: AST.Module -> [S.Expr] -> IO AST.Module
 codegen mod funs =
   withContext $ \context -> withModuleFromAST context ast $ \m -> do
-    print ast
     llstr <- moduleLLVMAssembly m
-    print llstr
+    -- print llstr
     pure ast
  where
   mDefs = execModuleBuilder emptyModuleBuilder
